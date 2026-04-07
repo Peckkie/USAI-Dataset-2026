@@ -1,13 +1,14 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/version-2026-blue?style=for-the-badge" />
-<img src="https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge" />
-<img src="https://img.shields.io/badge/license-research-orange?style=for-the-badge" />
+<img src="https://img.shields.io/badge/version-2026-0a9396?style=for-the-badge&logoColor=white" />
+<img src="https://img.shields.io/badge/status-active-2a9d8f?style=for-the-badge" />
+<img src="https://img.shields.io/badge/use-research%20only-e76f51?style=for-the-badge" />
+<img src="https://img.shields.io/badge/images-107%2C202-264653?style=for-the-badge" />
 
 # 🏥 USAI-Dataset-2026
 
 ### Ultrasound AI Dataset — Feature Vector Preparation Pipeline  
-*Khon Kaen University · Abdominal Ultrasound · Multi-label Classification*
+*Abdominal Ultrasound · Multi-label Disease Classification · KKU*
 
 ---
 
@@ -15,11 +16,7 @@
 
 ## 📌 Overview
 
-**USAI-Dataset-2026** is a curated medical imaging dataset pipeline designed for training and evaluating AI/ML models on abdominal ultrasound images. This repository contains the full preparation workflow — from raw data filtering to feature vector extraction — ready for downstream model training.
-
-> 🩺 Data sourced from real clinical ultrasound exams (2013–2023)  
-> 🤖 Feature vectors extracted using a pre-trained multi-label model  
-> 🏷️ 19 abnormality classes across liver, bile duct, gallbladder, and kidney
+**USAI-Dataset-2026** is a curated pipeline for preparing a medical-grade abdominal ultrasound dataset for AI/ML training. Starting from ~188,209 raw ultrasound images annotated by specialist doctors (2013–2023), the pipeline filters, maps disease labels, and merges 2048-dimensional feature vectors extracted from a pre-trained multi-label model — producing a clean, model-ready dataset of **107,202 images**.
 
 ---
 
@@ -28,8 +25,12 @@
 ```
 USAI-Dataset-2026/
 │
-├── 📓 USAI10K-Exploring.ipynb               # Main EDA & preparation notebook
-├── 📓 Preparation_USAI10K_merge_fv_mlt_nodel.ipynb  # Feature vector merge pipeline
+├── 📓 USAI10K-Exploring.ipynb
+│     └── EDA, doctor filtering, disease mapping, AB code labeling
+│
+├── 📓 Preparation_USAI10K_merge_fv_mlt_nodel.ipynb
+│     └── Merge filtered dataset with feature vectors (x1–x2048)
+│
 └── 📄 README.md
 ```
 
@@ -39,60 +40,51 @@ USAI-Dataset-2026/
 
 | Property | Value |
 |---|---|
-| **Source** | USAI Clinical Database 2013–2023 |
-| **Total Images** | ~188,209 |
-| **Filtered Dataset** | ~107,271 |
+| **Raw Images** | 188,209 |
+| **After filtering (non-Normal + target doctors)** | 109,289 |
+| **After feature vector merge (no NaN)** | **107,202** |
 | **Feature Dimensions** | x1 – x2048 |
+| **Disease Combination Patterns** | 230+ unique GroupAB patterns |
 | **Task Type** | Multi-label Classification |
-| **Modality** | Abdominal Ultrasound |
+| **Modality** | Abdominal Ultrasound (B-mode) |
+| **Period** | 2013 – 2023 |
 
 ---
 
-## 🏷️ Abnormality Classes (19 + Normal)
+## 🗃️ Key Files
 
-| Code | Label | Description |
+| File | Description | Primary Key |
 |---|---|---|
-| AB01 | MildFattyLiver | Mild fatty liver |
-| AB02 | ModerateFattyLiver | Moderate fatty liver |
-| AB03 | SevereFattyLiver | Severe fatty liver |
-| AB04 | Cirrhosis | Liver cirrhosis |
-| AB05 | PDF1 | Parenchymal diffuse finding grade 1 |
-| AB06 | PDF2 | Parenchymal diffuse finding grade 2 |
-| AB07 | PDF3 | Parenchymal diffuse finding grade 3 |
-| AB081 | LiverMass | Single liver mass |
-| AB082 | BDD | Bile duct dilatation (common / left / right lobe) |
-| AB09 | GallbladderStone | Gallstone |
-| AB10 | RenalCyst | Renal cyst |
-| AB11 | RenalParenchymalChange | Renal parenchymal change / Renal stone |
-| — | Normal | No abnormality detected |
+| `USAI_Doctor-all_2013-2023_dummy_pathcrop_AB.csv` | Raw annotated dataset | `img_path` |
+| `USAI_Doctor-all_2013-2023_filtered_15AB_107271.csv` | Filtered with AB codes | `img_path` |
+| `fv_usai10k_all_unlearn_mlt_model.csv` | Feature vectors (x1–x2048) | `path` |
+| `USAI_Doctor-all_2013-2023_filtered_15AB_fv_usai10k_all_unlearn_mlt_model_107202.csv` | **Final merged dataset** | `img_path` |
 
 ---
 
-## ⚙️ Pipeline Steps
+## 🏷️ Disease Label Mapping (GroupAB → AB Code)
 
-```mermaid
-flowchart LR
-    A[Raw CSV\n188K rows] --> B[Filter Doctors\n6 specialists]
-    B --> C[Remove Normal\nGroupAB != Normal]
-    C --> D[Map AB Codes\n19 classes]
-    D --> E[Merge Feature Vectors\nx1–x2048]
-    E --> F[Drop NaN rows]
-    F --> G[✅ Clean Dataset\ndf_disease]
-```
+| AB Code | Label | GroupAB value |
+|---|---|---|
+| AB01 | MildFattyLiver | `Mild fatty liver` |
+| AB02 | ModerateFattyLiver | `Moderate fatty liver` |
+| AB03 | SevereFattyLiver | `Severe fatty liver` |
+| AB04 | Cirrhosis | `Cirrhosis` |
+| AB05 | PDF1 | `PDF 1` |
+| AB06 | PDF2 | `PDF 2` |
+| AB07 | PDF3 | `PDF 3` |
+| AB081 | LiverMass | `Single Mass` |
+| AB082 | BDD | `BileDuct_Common bile duct`, `BileDuct_Right lobe`, `BileDuct_Left lobe` |
+| AB09 | GallbladderStone | `Gallstone` |
+| AB10 | RenalCyst | `Renal cyst` |
+| AB11 | RenalParenchymalChange / RenalStone | `Parenchymal change`, `Kidney_Parenchymal change`, `Renal stone` |
 
-### Step-by-step
-
-1. **Load raw data** — `USAI_Doctor-all_2013-2023_dummy_pathcrop_AB_5FPViT_out241.csv`
-2. **Filter specialists** — Select 6 target doctors by doctor code
-3. **Exclude Normal cases** — Keep only abnormal findings (`GroupAB != 'Normal'`)
-4. **Map disease labels** — Convert `GroupAB` string lists → AB codes
-5. **Merge feature vectors** — Join with `fv_usai10k_all_unlearn_mlt_model.csv` on `img_path`
-6. **Drop unmatched rows** — Remove rows with `NaN` in feature columns
-7. **Export** — Save as `df_disease.csv`
+> ℹ️ Each case can have **1–4 diseases** simultaneously.  
+> `GroupAB` stores a Python list string (e.g. `"['Mild fatty liver', 'Renal cyst']"`) — use `ast.literal_eval()` to parse.
 
 ---
 
-## 👩‍⚕️ Contributing Specialists
+## 👩‍⚕️ Target Specialist Doctors (6 doctors)
 
 | Doctor Code | Name |
 |---|---|
@@ -105,23 +97,110 @@ flowchart LR
 
 ---
 
+## ⚙️ Pipeline
+
+```mermaid
+flowchart LR
+    A["Raw CSV\n188,209 images"] --> B["Filter 6 Doctors"]
+    B --> C["Remove Normal\nGroupAB ≠ Normal\n→ 109,289 images"]
+    C --> D["Map AB Codes\n12 disease labels"]
+    D --> E["Save filtered_15AB\n107,271 rows"]
+    E --> F["Merge Feature Vectors\nJOIN on img_path = path\nx1–x2048"]
+    F --> G["Drop NaN rows"]
+    G --> H["✅ Final Dataset\n107,202 images"]
+```
+
+### Step-by-step
+
+**Notebook 1 — `USAI10K-Exploring.ipynb`**
+
+```python
+import pandas as pd, ast
+
+# 1. Load raw data
+usai10k = pd.read_csv('./csv/USAI_Doctor-all_2013-2023_dummy_pathcrop_AB.csv')
+usai10k = usai10k.loc[:, ~usai10k.columns.str.contains('^Unnamed')]
+# shape: (188209, 46)
+
+# 2. Filter 6 target doctors
+doctor_codes = [12, 349, 10, 465, 1816, 844]
+df_filtered = usai10k[usai10k['Doctor'].isin(doctor_codes)].copy()
+
+# 3. Remove Normal cases
+df_filtered = df_filtered[df_filtered['GroupAB'] != 'Normal'].copy()
+# → 109,289 rows, 230+ disease patterns
+
+# 4. Map disease labels to AB codes
+disease_map = {
+    'Mild fatty liver': 'AB01', 'Moderate fatty liver': 'AB02',
+    'Severe fatty liver': 'AB03', 'Cirrhosis': 'AB04',
+    'PDF 1': 'AB05', 'PDF 2': 'AB06', 'PDF 3': 'AB07',
+    'Single Mass': 'AB081',
+    'BileDuct_Common bile duct': 'AB082', 'BileDuct_Right lobe': 'AB082',
+    'BileDuct_Left lobe': 'AB082', 'Gallstone': 'AB09',
+    'Renal cyst': 'AB10', 'Parenchymal change': 'AB11',
+    'Kidney_Parenchymal change': 'AB11', 'Renal stone': 'AB11',
+}
+
+def parse_group(val):
+    try: return ast.literal_eval(val)
+    except: return [val]
+
+def map_group_to_ab(val):
+    codes = list(dict.fromkeys(disease_map[d] for d in parse_group(val) if d in disease_map))
+    return codes if len(codes) > 1 else codes[0] if codes else None
+
+df_disease = df_filtered[df_filtered['GroupAB'].apply(
+    lambda v: any(d in disease_map for d in parse_group(v))
+)].copy()
+df_disease['AB_code'] = df_disease['GroupAB'].apply(map_group_to_ab)
+
+# 5. Save
+df_disease.to_csv('./csv/USAI_Doctor-all_2013-2023_filtered_15AB_107271.csv', index=False)
+```
+
+**Notebook 2 — `Preparation_USAI10K_merge_fv_mlt_nodel.ipynb`**
+
+```python
+# 6. Load filtered dataset + feature vectors
+filtered_15AB = pd.read_csv('./csv/USAI_Doctor-all_2013-2023_filtered_15AB_107271.csv')
+fv_usai10k_all = pd.read_csv('./csv/fv_usai10k_all_unlearn_mlt_model.csv')
+fv_usai10k_all = fv_usai10k_all.loc[:, ~fv_usai10k_all.columns.str.contains('^Unnamed')]
+
+# 7. Merge on img_path = path (keep x1–x2048 only)
+x_cols = [f'x{i}' for i in range(1, 2049)]
+merged = filtered_15AB.merge(
+    fv_usai10k_all[['path'] + x_cols],
+    left_on='img_path', right_on='path', how='left'
+)
+
+# 8. Drop unmatched rows (NaN in feature columns)
+merged_clean = merged.dropna(subset=['x1']).copy()
+# → 107,202 rows
+
+# 9. Save final dataset
+merged_clean.to_csv(
+    './csv/USAI_Doctor-all_2013-2023_filtered_15AB_fv_usai10k_all_unlearn_mlt_model_107202.csv',
+    index=False
+)
+```
+
+---
+
 ## 🚀 Quick Start
 
 ```python
 import pandas as pd
 
-# Load prepared dataset
-df = pd.read_csv('./csv/df_disease.csv')
+df = pd.read_csv('./csv/USAI_Doctor-all_2013-2023_filtered_15AB_fv_usai10k_all_unlearn_mlt_model_107202.csv')
 
-# Feature vectors
 x_cols = [f'x{i}' for i in range(1, 2049)]
-X = df[x_cols].values
+X = df[x_cols].values        # Feature matrix: (107202, 2048)
+y = df['AB_code'].values     # Labels
 
-# Labels
-y = df['AB_code'].values
-
-print(f'Dataset shape: {df.shape}')
-print(f'Feature matrix: {X.shape}')
+print(f'Dataset : {df.shape}')
+print(f'Features: {X.shape}')
+print(f'Labels  :\n{df["AB_code"].value_counts()}')
 ```
 
 ---
@@ -129,23 +208,20 @@ print(f'Feature matrix: {X.shape}')
 ## 📦 Requirements
 
 ```bash
-pandas
-numpy
-matplotlib
-scikit-learn
+pip install pandas numpy matplotlib scikit-learn
 ```
 
 ---
 
 ## 📄 License
 
-This dataset is intended for **academic and research use only**.  
-Clinical data is anonymized and used under institutional research approval.
+This dataset is for **academic and research use only**.  
+Clinical data is anonymized under institutional research approval.
 
 ---
 
 <div align="center">
 
-**VI-Lab Research Team · Khon Kaen University · 2026**
+**VI-LAB Research Team · Khon Kaen University · 2026**
 
 </div>
